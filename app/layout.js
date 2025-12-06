@@ -1,10 +1,17 @@
+import './globals.css'
+
 export const metadata = {
   title: 'Tsutomu Pro Team - Captain Submission',
-  description: 'Join the Tsutomu Pro Team - Submit your captain profile',
+  description: 'Join the Tsutomu Lures Pro Team. Submit your profile to be featured on our website.',
   openGraph: {
-    title: 'Tsutomu Pro Team',
-    description: 'Captain profile submission for Tsutomu Lures Pro Team page',
-    images: ['/ahitrooper white1.png'],
+    title: 'Tsutomu Pro Team - Captain Submission',
+    description: 'Join the Tsutomu Lures Pro Team. Submit your profile to be featured on our website.',
+    siteName: 'Tsutomu Lures',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Tsutomu Pro Team - Captain Submission',
+    description: 'Join the Tsutomu Lures Pro Team',
   },
 }
 
