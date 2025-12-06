@@ -48,7 +48,7 @@ export default function CaptainForm() {
           </div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Thank You!</h2>
           <p className="text-gray-600 mb-6">
-            Your information has been submitted. We'll add you to the Pro Team page soon!
+            We've received your information and will feature you on our Pro Team page shortly!
           </p>
           <button
             onClick={() => {
@@ -65,7 +65,7 @@ export default function CaptainForm() {
             }}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
           >
-            Submit Another
+            Submit Another Captain
           </button>
         </div>
       </div>
@@ -77,9 +77,14 @@ export default function CaptainForm() {
       <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-lg shadow-xl p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Join the Tsutomu Pro Team</h1>
+            <img 
+              src="https://cdn.shopify.com/s/files/1/0007/0989/9746/files/tsutomu-logo.png?v=1613589835" 
+              alt="Tsutomu Lures" 
+              className="h-20 mx-auto mb-6"
+            />
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Captain Profile Submission</h1>
             <p className="text-gray-600">
-              Share your experience with Tsutomu lures and be featured on our Pro Team page
+              Help us feature you on the Tsutomu Pro Team page
             </p>
           </div>
 
@@ -94,8 +99,7 @@ export default function CaptainForm() {
                 required
                 value={formData.captainName}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="JR Chalker"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               />
             </div>
 
@@ -109,8 +113,7 @@ export default function CaptainForm() {
                 required
                 value={formData.charterName}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Reel Addiction III"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               />
             </div>
 
@@ -124,26 +127,24 @@ export default function CaptainForm() {
                 required
                 value={formData.location}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Honolulu, Oahu"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Your Testimonial *
+                Your Testimonial About Tsutomu Lures *
               </label>
               <textarea
                 name="quote"
                 required
                 value={formData.quote}
                 onChange={handleChange}
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Why do you run Tsutomu lures? What makes them work for you?"
+                rows={5}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               />
               <p className="text-sm text-gray-500 mt-1">
-                Share your honest experience - what you love about Tsutomu lures
+                Share your honest experience - why you trust Tsutomu lures
               </p>
             </div>
 
@@ -157,8 +158,7 @@ export default function CaptainForm() {
                 required
                 value={formData.websiteUrl}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="https://yourcharter.com"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               />
             </div>
 
@@ -183,7 +183,7 @@ export default function CaptainForm() {
                 </div>
               )}
               <p className="text-sm text-gray-500 mt-1">
-                Photo of you, your boat, or a great catch with Tsutomu lures
+                Photo of you, your boat, or a great catch
               </p>
             </div>
 
@@ -191,13 +191,13 @@ export default function CaptainForm() {
               type="submit"
               className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
             >
-              Submit to Pro Team
+              Submit Profile
             </button>
           </form>
         </div>
 
         <p className="text-center text-gray-600 mt-6 text-sm">
-          Questions? Contact us at info@tsutomulures.com
+          Questions? Email info@tsutomulures.com
         </p>
       </div>
     </div>
