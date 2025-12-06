@@ -5,7 +5,6 @@ export default function CaptainForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [error, setError] = useState('');
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
@@ -21,17 +20,13 @@ export default function CaptainForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    setError('');
 
     const formData = new FormData(e.target);
     
     try {
-      const response = await fetch(e.target.action, {
+      const response = await fetch('https://usebasin.com/f/4f4a083a0a39', {
         method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json'
-        }
+        body: formData
       });
 
       if (response.ok) {
@@ -39,16 +34,11 @@ export default function CaptainForm() {
         e.target.reset();
         setPhotoPreview(null);
       } else {
-        const data = await response.json();
-        if (data.errors) {
-          setError(data.errors.map(error => error.message).join(", "));
-        } else {
-          setError("Oops! There was a problem submitting your form");
-        }
+        alert('Something went wrong. Please try again.');
       }
-    } catch (err) {
-      setError("Oops! There was a problem submitting your form");
-      console.error('Error:', err);
+    } catch (error) {
+      alert('Error submitting form. Please try again.');
+      console.error('Error:', error);
     } finally {
       setSubmitting(false);
     }
@@ -94,18 +84,7 @@ export default function CaptainForm() {
             </p>
           </div>
 
-          <form 
-            action="https://formspree.io/f/mnnezlwy"
-            method="POST"
-            onSubmit={handleSubmit} 
-            className="space-y-6"
-          >
-            {error && (
-              <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded">
-                {error}
-              </div>
-            )}
-
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-200 mb-2">
                 Captain Name *
