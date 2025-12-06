@@ -1,28 +1,14 @@
 'use client';
 import { useState } from 'react';
-import Image from 'next/image';
 
 export default function CaptainForm() {
-  const [formData, setFormData] = useState({
-    captainName: '',
-    charterName: '',
-    location: '',
-    quote: '',
-    websiteUrl: '',
-    photo: null
-  });
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(null);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData(prev => ({ ...prev, photo: file }));
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(reader.result);
@@ -33,9 +19,28 @@ export default function CaptainForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
+
+    const formData = new FormData(e.target);
     
-    console.log('Form submitted:', formData);
-    setSubmitted(true);
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        setSubmitted(true);
+        e.target.reset();
+        setPhotoPreview(null);
+      } else {
+        alert('Something went wrong. Please try again.');
+      }
+    } catch (error) {
+      alert('Error submitting form. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -52,18 +57,7 @@ export default function CaptainForm() {
             We've received your information and will feature you on our Pro Team page shortly!
           </p>
           <button
-            onClick={() => {
-              setSubmitted(false);
-              setFormData({
-                captainName: '',
-                charterName: '',
-                location: '',
-                quote: '',
-                websiteUrl: '',
-                photo: null
-              });
-              setPhotoPreview(null);
-            }}
+            onClick={() => setSubmitted(false)}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
           >
             Submit Another Captain
@@ -90,16 +84,17 @@ export default function CaptainForm() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            <input type="hidden" name="access_key" value="c55bd8dd-2e25-4f53-91e5-b75ad5fd133e" />
+            <input type="hidden" name="subject" value="New Pro Team Captain Submission" />
+            
             <div>
               <label className="block text-sm font-medium text-gray-200 mb-2">
                 Captain Name *
               </label>
               <input
                 type="text"
-                name="captainName"
+                name="captain_name"
                 required
-                value={formData.captainName}
-                onChange={handleChange}
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
               />
             </div>
@@ -110,10 +105,8 @@ export default function CaptainForm() {
               </label>
               <input
                 type="text"
-                name="charterName"
+                name="charter_name"
                 required
-                value={formData.charterName}
-                onChange={handleChange}
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
               />
             </div>
@@ -126,8 +119,6 @@ export default function CaptainForm() {
                 type="text"
                 name="location"
                 required
-                value={formData.location}
-                onChange={handleChange}
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
               />
             </div>
@@ -137,10 +128,8 @@ export default function CaptainForm() {
                 Your Testimonial About Tsutomu Lures *
               </label>
               <textarea
-                name="quote"
+                name="testimonial"
                 required
-                value={formData.quote}
-                onChange={handleChange}
                 rows={5}
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
               />
@@ -155,10 +144,8 @@ export default function CaptainForm() {
               </label>
               <input
                 type="url"
-                name="websiteUrl"
+                name="website_url"
                 required
-                value={formData.websiteUrl}
-                onChange={handleChange}
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
               />
             </div>
@@ -169,6 +156,7 @@ export default function CaptainForm() {
               </label>
               <input
                 type="file"
+                name="photo"
                 accept="image/*"
                 required
                 onChange={handlePhotoChange}
@@ -190,9 +178,10 @@ export default function CaptainForm() {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
+              disabled={submitting}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Submit Profile
+              {submitting ? 'Submitting...' : 'Submit Profile'}
             </button>
           </form>
         </div>
