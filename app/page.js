@@ -5,60 +5,15 @@ export default function CaptainForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [compressedFile, setCompressedFile] = useState(null);
 
-  const compressImage = (file) => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          
-          // Resize if too large
-          const maxDimension = 1200;
-          if (width > maxDimension || height > maxDimension) {
-            if (width > height) {
-              height = (height / width) * maxDimension;
-              width = maxDimension;
-            } else {
-              width = (width / height) * maxDimension;
-              height = maxDimension;
-            }
-          }
-          
-          canvas.width = width;
-          canvas.height = height;
-          
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          
-          // Convert to blob with quality compression
-          canvas.toBlob((blob) => {
-            resolve(blob);
-          }, 'image/jpeg', 0.8); // 80% quality
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handlePhotoChange = async (e) => {
+  const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Show preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(reader.result);
       };
       reader.readAsDataURL(file);
-      
-      // Compress the image
-      const compressed = await compressImage(file);
-      setCompressedFile(compressed);
     }
   };
 
@@ -66,44 +21,27 @@ export default function CaptainForm() {
     e.preventDefault();
     setSubmitting(true);
 
-    const formData = new FormData();
-    
-    // Add hidden fields
-    formData.append('access_key', 'c55bd8dd-2e25-4f53-91e5-b75ad5fd133e');
-    formData.append('subject', 'New Pro Team Captain Submission');
-    
-    // Add form fields
-    formData.append('Captain Name', e.target['Captain Name'].value);
-    formData.append('Charter Name', e.target['Charter Name'].value);
-    formData.append('Location', e.target['Location'].value);
-    formData.append('Testimonial', e.target['Testimonial'].value);
-    formData.append('Website URL', e.target['Website URL'].value);
-    
-    // Add compressed photo
-    if (compressedFile) {
-      formData.append('attachment', compressedFile, 'captain-photo.jpg');
-    }
+    const formData = new FormData(e.target);
     
     try {
-      const response = await fetch('https://api.web3forms.com/submit', {
+      const response = await fetch('https://formspree.io/f/mnnezlwy', {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
       });
 
-      const result = await response.json();
-
-      if (result.success) {
+      if (response.ok) {
         setSubmitted(true);
         e.target.reset();
         setPhotoPreview(null);
-        setCompressedFile(null);
       } else {
-        console.error('Full error:', result);
-        alert('Submission failed: ' + (result.message || 'Unknown error'));
+        alert('Something went wrong. Please try again.');
       }
     } catch (error) {
-      console.error('Catch error:', error);
-      alert('Network error. Please check your connection.');
+      alert('Error submitting form. Please try again.');
+      console.error('Error:', error);
     } finally {
       setSubmitting(false);
     }
@@ -156,7 +94,7 @@ export default function CaptainForm() {
               </label>
               <input
                 type="text"
-                name="Captain Name"
+                name="captain_name"
                 required
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
               />
@@ -168,7 +106,7 @@ export default function CaptainForm() {
               </label>
               <input
                 type="text"
-                name="Charter Name"
+                name="charter_name"
                 required
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
               />
@@ -180,7 +118,7 @@ export default function CaptainForm() {
               </label>
               <input
                 type="text"
-                name="Location"
+                name="location"
                 required
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
               />
@@ -191,7 +129,7 @@ export default function CaptainForm() {
                 Your Testimonial About Tsutomu Lures *
               </label>
               <textarea
-                name="Testimonial"
+                name="testimonial"
                 required
                 rows={5}
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
@@ -207,7 +145,7 @@ export default function CaptainForm() {
               </label>
               <input
                 type="url"
-                name="Website URL"
+                name="website_url"
                 required
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
               />
@@ -235,7 +173,7 @@ export default function CaptainForm() {
                 </div>
               )}
               <p className="text-sm text-gray-400 mt-1">
-                Photo will be automatically optimized for web
+                Photo of you, your boat, or a great catch
               </p>
             </div>
 
