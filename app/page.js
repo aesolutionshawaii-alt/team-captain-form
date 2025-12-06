@@ -5,13 +5,23 @@ export default function CaptainForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [photoBase64, setPhotoBase64] = useState('');
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Photo must be less than 5MB');
+        e.target.value = '';
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPhotoPreview(reader.result);
+        const base64String = reader.result;
+        setPhotoPreview(base64String);
+        setPhotoBase64(base64String);
       };
       reader.readAsDataURL(file);
     }
@@ -21,7 +31,23 @@ export default function CaptainForm() {
     e.preventDefault();
     setSubmitting(true);
 
-    const formData = new FormData(e.target);
+    const formElement = e.target;
+    const formData = new FormData();
+    
+    // Add all form fields
+    formData.append('access_key', 'c55bd8dd-2e25-4f53-91e5-b75ad5fd133e');
+    formData.append('subject', 'New Pro Team Captain Submission');
+    formData.append('from_name', 'Tsutomu Captain Form');
+    formData.append('captain_name', formElement.captain_name.value);
+    formData.append('charter_name', formElement.charter_name.value);
+    formData.append('location', formElement.location.value);
+    formData.append('testimonial', formElement.testimonial.value);
+    formData.append('website_url', formElement.website_url.value);
+    
+    // Add photo as base64 attachment
+    if (photoBase64) {
+      formData.append('attachment', photoBase64);
+    }
     
     try {
       const response = await fetch('https://api.web3forms.com/submit', {
@@ -29,15 +55,20 @@ export default function CaptainForm() {
         body: formData
       });
 
-      if (response.ok) {
+      const data = await response.json();
+
+      if (data.success) {
         setSubmitted(true);
-        e.target.reset();
+        formElement.reset();
         setPhotoPreview(null);
+        setPhotoBase64('');
       } else {
-        alert('Something went wrong. Please try again.');
+        alert('Something went wrong: ' + (data.message || 'Please try again'));
+        console.error('Form error:', data);
       }
     } catch (error) {
       alert('Error submitting form. Please try again.');
+      console.error('Submit error:', error);
     } finally {
       setSubmitting(false);
     }
@@ -84,9 +115,6 @@ export default function CaptainForm() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <input type="hidden" name="access_key" value="c55bd8dd-2e25-4f53-91e5-b75ad5fd133e" />
-            <input type="hidden" name="subject" value="New Pro Team Captain Submission" />
-            
             <div>
               <label className="block text-sm font-medium text-gray-200 mb-2">
                 Captain Name *
@@ -152,7 +180,7 @@ export default function CaptainForm() {
 
             <div>
               <label className="block text-sm font-medium text-gray-200 mb-2">
-                Photo *
+                Photo * (Max 5MB)
               </label>
               <input
                 type="file"
