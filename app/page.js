@@ -5,25 +5,60 @@ export default function CaptainForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [photoBase64, setPhotoBase64] = useState('');
+  const [compressedFile, setCompressedFile] = useState(null);
 
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Check file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Photo must be less than 5MB');
-        e.target.value = '';
-        return;
-      }
-
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result;
-        setPhotoPreview(base64String);
-        setPhotoBase64(base64String);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Resize if too large
+          const maxDimension = 1200;
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = (height / width) * maxDimension;
+              width = maxDimension;
+            } else {
+              width = (width / height) * maxDimension;
+              height = maxDimension;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Convert to blob with quality compression
+          canvas.toBlob((blob) => {
+            resolve(blob);
+          }, 'image/jpeg', 0.8); // 80% quality
+        };
+        img.src = e.target.result;
       };
       reader.readAsDataURL(file);
+    });
+  };
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Show preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+      
+      // Compress the image
+      const compressed = await compressImage(file);
+      setCompressedFile(compressed);
     }
   };
 
@@ -31,22 +66,22 @@ export default function CaptainForm() {
     e.preventDefault();
     setSubmitting(true);
 
-    const formElement = e.target;
     const formData = new FormData();
     
-    // Add all form fields
+    // Add hidden fields
     formData.append('access_key', 'c55bd8dd-2e25-4f53-91e5-b75ad5fd133e');
     formData.append('subject', 'New Pro Team Captain Submission');
-    formData.append('from_name', 'Tsutomu Captain Form');
-    formData.append('captain_name', formElement.captain_name.value);
-    formData.append('charter_name', formElement.charter_name.value);
-    formData.append('location', formElement.location.value);
-    formData.append('testimonial', formElement.testimonial.value);
-    formData.append('website_url', formElement.website_url.value);
     
-    // Add photo as base64 attachment
-    if (photoBase64) {
-      formData.append('attachment', photoBase64);
+    // Add form fields
+    formData.append('Captain Name', e.target['Captain Name'].value);
+    formData.append('Charter Name', e.target['Charter Name'].value);
+    formData.append('Location', e.target['Location'].value);
+    formData.append('Testimonial', e.target['Testimonial'].value);
+    formData.append('Website URL', e.target['Website URL'].value);
+    
+    // Add compressed photo
+    if (compressedFile) {
+      formData.append('attachment', compressedFile, 'captain-photo.jpg');
     }
     
     try {
@@ -55,20 +90,20 @@ export default function CaptainForm() {
         body: formData
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
-      if (data.success) {
+      if (result.success) {
         setSubmitted(true);
-        formElement.reset();
+        e.target.reset();
         setPhotoPreview(null);
-        setPhotoBase64('');
+        setCompressedFile(null);
       } else {
-        alert('Something went wrong: ' + (data.message || 'Please try again'));
-        console.error('Form error:', data);
+        console.error('Full error:', result);
+        alert('Submission failed: ' + (result.message || 'Unknown error'));
       }
     } catch (error) {
-      alert('Error submitting form. Please try again.');
-      console.error('Submit error:', error);
+      console.error('Catch error:', error);
+      alert('Network error. Please check your connection.');
     } finally {
       setSubmitting(false);
     }
@@ -121,7 +156,7 @@ export default function CaptainForm() {
               </label>
               <input
                 type="text"
-                name="captain_name"
+                name="Captain Name"
                 required
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
               />
@@ -133,7 +168,7 @@ export default function CaptainForm() {
               </label>
               <input
                 type="text"
-                name="charter_name"
+                name="Charter Name"
                 required
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
               />
@@ -145,7 +180,7 @@ export default function CaptainForm() {
               </label>
               <input
                 type="text"
-                name="location"
+                name="Location"
                 required
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
               />
@@ -156,7 +191,7 @@ export default function CaptainForm() {
                 Your Testimonial About Tsutomu Lures *
               </label>
               <textarea
-                name="testimonial"
+                name="Testimonial"
                 required
                 rows={5}
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
@@ -172,7 +207,7 @@ export default function CaptainForm() {
               </label>
               <input
                 type="url"
-                name="website_url"
+                name="Website URL"
                 required
                 className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
               />
@@ -180,7 +215,7 @@ export default function CaptainForm() {
 
             <div>
               <label className="block text-sm font-medium text-gray-200 mb-2">
-                Photo * (Max 5MB)
+                Photo *
               </label>
               <input
                 type="file"
@@ -200,7 +235,7 @@ export default function CaptainForm() {
                 </div>
               )}
               <p className="text-sm text-gray-400 mt-1">
-                Photo of you, your boat, or a great catch
+                Photo will be automatically optimized for web
               </p>
             </div>
 
